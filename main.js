@@ -15,8 +15,8 @@ async function obtenerNits() {
       id: nit.nitCod,          // ID único del cliente
       nombre: nit.nitNombre,  // Nombre del cliente
       documento: nit.nitDoc,  // Documento del cliente
-      direccion: nit.nitPlazo, // Dirección (ajustar si necesario)
-      telefono: nit.nitCupo,  // Teléfono (ajustar si necesario)
+      plazo: nit.nitPlazo, // Dirección (ajustar si necesario)
+      cupo: nit.nitCupo,  // Teléfono (ajustar si necesario)
       cartera: nit.nitCart,    // Cartera del cliente
       disponible: nit.nitDisp  // Cantidad disponible
     }));
@@ -38,38 +38,41 @@ async function obtenerNits() {
 // Llamar a la función para obtener los datos
 obtenerNits();
 
-const articulos = [
-  {
-    codigo: 'A001',
-    nombre: 'Paracetamol',
-    precio: 12.50,
-    laboratorio: 'Farmacéutica XYZ',
-    stock: 100,
-    presentacion: 'Tabletas 500mg',
-    vencimiento: '2024-12-31',
-    imagen: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    codigo: 'A002',
-    nombre: 'Ibuprofeno',
-    precio: 15.75,
-    laboratorio: 'Laboratorios ABC',
-    stock: 75,
-    presentacion: 'Tabletas 400mg',
-    vencimiento: '2024-10-15',
-    imagen: 'https://images.unsplash.com/photo-1585435557343-3b092031a831?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    codigo: 'A003',
-    nombre: 'Amoxicilina',
-    precio: 25.00,
-    laboratorio: 'Farmacéutica DEF',
-    stock: 50,
-    presentacion: 'Cápsulas 500mg',
-    vencimiento: '2024-08-30',
-    imagen: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+let articulos = [];
+
+async function obtenerArts() {
+  try {
+    const response = await fetch('http://localhost:8080/articulos'); // Ruta de la API
+    const artsData = await response.json();
+
+    console.log('Datos de la API:', artsData); // Verificar qué datos se reciben
+
+    // Mapear los datos de la API
+    articulos = artsData.map(articulo => ({
+      id: articulo.artCod,          // ID único del cliente
+      nombre: articulo.artNom,  // Nombre del cliente
+      laboratorio: articulo.artLab,  // Documento del cliente
+      costo: articulo.artCosto, // Dirección (ajustar si necesario)
+      saldo: articulo.artSaldo,  // Teléfono (ajustar si necesario)
+      precioVenta: articulo.artPreVt,    // Cartera del cliente
+    }));
+
+    console.log('Clientes cargados:', articulos); // Verificar los datos mapeados
+
+    // Llenar el select de clientes cuando los datos estén listos
+    const articuloSelect = document.getElementById('articuloSelect');
+    articuloSelect.innerHTML = `<option value="">Seleccione un articulo</option>` +
+      articulos.map(articulo => 
+        `<option value="${articulo.id}">${articulo.id} - ${articulo.nombre}</option>`
+      ).join('');
+
+  } catch (error) {
+    console.error('Error al obtener los Articulos:', error);
   }
-];
+}
+
+// Llamar a la función para obtener los datos
+obtenerArts();
 
 // Estado de la aplicación
 let facturas = [];
@@ -117,12 +120,12 @@ function mostrarInfoCliente(clienteId) {
         </div>
         <div class="info-row">
           <div class="info-field">
-            <label class="info-label">Dirección:</label>
-            <input type="text" class="info-input" value="${cliente.direccion}">
+            <label class="info-label">Plazo:</label>
+            <input type="text" class="info-input" value="${cliente.plazo}">
           </div>
           <div class="info-field">
-            <label class="info-label">Teléfono:</label>
-            <input type="text" class="info-input" value="${cliente.telefono}">
+            <label class="info-label">Cupo:</label>
+            <input type="text" class="info-input" value="${cliente.cupo}">
           </div>
         </div>
         <div class="info-row">
@@ -151,7 +154,7 @@ function mostrarInfoCliente(clienteId) {
 
 // Función para mostrar información del artículo
 function mostrarInfoArticulo(articuloId) {
-  const articulo = articulos.find(a => a.codigo === articuloId);
+  const articulo = articulos.find(a => a.id === articuloId);
   const infoArticulo = document.getElementById('articuloInfo');
 
   if (articulo) {
@@ -163,18 +166,22 @@ function mostrarInfoArticulo(articuloId) {
             <input type="text" class="info-input" value="${articulo.laboratorio}" disabled>
           </div>
           <div class="info-field">
-            <label class="info-label">Presentación:</label>
-            <input type="text" class="info-input" value="${articulo.presentacion}" disabled>
+            <label class="info-label">Nombre:</label>
+            <input type="text" class="info-input" value="${articulo.nombre}" disabled>
+          </div>
+          <div class="info-field">
+            <label class="info-label">Costo:</label>
+            <input type="text" class="info-input" value="${articulo.costo}" disabled>
           </div>
         </div>
         <div class="info-row">
           <div class="info-field">
-            <label class="info-label">Stock:</label>
-            <input type="number" class="info-input" value="${articulo.stock}" disabled>
+            <label class="info-label">Saldo:</label>
+            <input type="number" class="info-input" value="${articulo.saldo}" disabled>
           </div>
           <div class="info-field">
-            <label class="info-label">Vencimiento:</label>
-            <input type="date" class="info-input" value="${articulo.vencimiento}" disabled>
+            <label class="info-label">Precio de Venta:</label>
+            <input type="number" class="info-input" value="${articulo.precioVenta}" disabled>
           </div>
         </div>
       </div>
@@ -245,14 +252,14 @@ document.querySelector('#app').innerHTML = `
 
 
           <div class="form-group">
-            <label for="articuloSelect">Medicamento:</label>
+            <label for="articuloSelect">Articulo:</label>
             <select id="articuloSelect">
-              <option value="">Seleccione un medicamento</option>
+              <option value="">Seleccione un articulo</option>
               ${articulos.map(articulo =>
-  `<option value="${articulo.codigo}">${articulo.codigo} - ${articulo.nombre}</option>`
+  `<option value="${articulo.id}">${articulo.id} - ${articulo.nombre}</option>`
 ).join('')}
             </select>
-            <div id="articuloInfo"></div>
+            <div id="articuloInfo"></div> <!-- Aquí se mostrará la información del cliente -->
           </div>
 
           <div class="form-group">
@@ -307,10 +314,15 @@ document.getElementById('clienteSelect').addEventListener('change', (e) => {
   }
 });
 
-
-// Manejo del evento de cambio del artículo (medicación)
+// Manejo del evento de cambio del cliente
 document.getElementById('articuloSelect').addEventListener('change', (e) => {
-  mostrarInfoArticulo(e.target.value);
+  const articuloId = parseInt(e.target.value);  
+
+  if (articuloId) {
+    mostrarInfoArticulo(articuloId);  
+  } else {
+    document.getElementById('articuloInfo').innerHTML = '';  
+  }
 });
 
 
@@ -325,7 +337,7 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
   }
 
   const cliente = clientes.find(c => c.id === clienteId);
-  const articulo = articulos.find(a => a.codigo === articuloId);
+  const articulo = articulos.find(a => a.id === articuloId);
   const total = articulo.precio * cantidad;
 
   if (total > cliente.disponible) {
