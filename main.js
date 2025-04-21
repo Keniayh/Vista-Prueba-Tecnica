@@ -5,18 +5,18 @@ let clientes = [];
 
 async function obtenerNits() {
   try {
-    const response = await fetch('http://localhost:8080/nits'); // Ruta de la API
+    const response = await fetch('http://localhost:3307/nits'); // Ruta de la API
     const nitsData = await response.json();
 
-    console.log('Datos de la API:', nitsData); // Verificar qué datos se reciben
+    console.log('Datos de la API:', nitsData); 
 
     // Mapear los datos de la API
     clientes = nitsData.map(nit => ({
       id: nit.nitCod,          // ID único del cliente
       nombre: nit.nitNombre,  // Nombre del cliente
       documento: nit.nitDoc,  // Documento del cliente
-      plazo: nit.nitPlazo, // Dirección (ajustar si necesario)
-      cupo: nit.nitCupo,  // Teléfono (ajustar si necesario)
+      plazo: nit.nitPlazo, 
+      cupo: nit.nitCupo,  
       cartera: nit.nitCart,    // Cartera del cliente
       disponible: nit.nitDisp  // Cantidad disponible
     }));
@@ -42,7 +42,7 @@ let articulos = [];
 
 async function obtenerArts() {
   try {
-    const response = await fetch('http://localhost:8080/articulos'); // Ruta de la API
+    const response = await fetch('http://localhost:3307/articulos'); // Ruta de la API
     const artsData = await response.json();
 
     console.log('Datos de la API:', artsData); // Verificar qué datos se reciben
@@ -51,9 +51,9 @@ async function obtenerArts() {
     articulos = artsData.map(articulo => ({
       id: articulo.artCod,          // ID único del cliente
       nombre: articulo.artNom,  // Nombre del cliente
-      laboratorio: articulo.artLab,  // Documento del cliente
-      costo: articulo.artCosto, // Dirección (ajustar si necesario)
-      saldo: articulo.artSaldo,  // Teléfono (ajustar si necesario)
+      laboratorio: articulo.artLab,  
+      costo: articulo.artCosto, 
+      saldo: articulo.artSaldo,  
       precioVenta: articulo.artPreVt,    // Cartera del cliente
     }));
 
@@ -207,8 +207,8 @@ document.querySelector('#app').innerHTML = `
       </div>
       <ul class="nav-items">
         <li class="nav-item" data-view="facturas">📝 Facturas</li>
-        <li class="nav-item" data-view="clientes">👥 Clientes</li>
-        <li class="nav-item" data-view="productos">📦 Productos</li>
+        <li class="nav-item" data-view="clientes"><a href="./view/nit.html">👥 Clientes</a></li>
+        <li class="nav-item" data-view="productos"><a href="./view/articulos.html">📦 Productos</a></li>
         <li class="nav-item" data-view="reportes">📊 Reportes</li>
       </ul>
     </div>

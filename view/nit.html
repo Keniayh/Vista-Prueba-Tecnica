@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gestión de Nits</title>
+  <link rel="stylesheet" href="../css/nit.css">
+</head>
+<body>
+
+  <div class="sidebar">
+    <h2>Mi Dashboard</h2>
+    <a href="../index.html">Inicio</a>
+    <a href="./nit.html">Clientes</a>
+    <a href="./articulos.html">Articulos</a>
+    <a href="#">Configuración</a>
+  </div>
+
+  <div class="main">
+    <h1>Gestión de Clientes</h1>
+
+    <div class="form-section">
+      <h2>Nuevo Cliente</h2>
+      <input type="text" id="nombre" placeholder="Nombre" >
+      <input type="text" id="doc" placeholder="Documento" >
+      <input type="number" id="cupo" placeholder="Cupo" required>
+      <input type="number" id="plazo" placeholder="Plazo" required>
+      <input type="number" id="cartera" placeholder="Cartera" required>
+      <input type="number" id="disponible" placeholder="Disponible" required>
+      <button onclick="submitNitForm()">Guardar</button>
+      <div id="message"></div>
+    </div>
+
+    <div class="nits-list" id="nits"></div>
+  </div>
+
+  <script src="../js/nit.js"></script>
+</body>
+</html>
