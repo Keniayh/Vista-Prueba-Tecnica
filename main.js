@@ -149,9 +149,6 @@ function mostrarInfoCliente(clienteId) {
 }
 
 
-
-
-
 // Función para mostrar información del artículo
 function mostrarInfoArticulo(articuloId) {
   const articulo = articulos.find(a => a.id === articuloId);
@@ -208,7 +205,7 @@ document.querySelector('#app').innerHTML = `
       <ul class="nav-items">
         <li class="nav-item" data-view="facturas">📝 Facturas</li>
         <li class="nav-item" data-view="clientes"><a href="./view/nit.html">👥 Clientes</a></li>
-        <li class="nav-item" data-view="productos"><a href="./view/articulos.html">📦 Productos</a></li>
+        <li class="nav-item" data-view="productos"><a href="./view/articulos.html">📦 Articulos</a></li>
         <li class="nav-item" data-view="reportes">📊 Reportes</li>
       </ul>
     </div>

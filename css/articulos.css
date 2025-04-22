@@ -10,12 +10,28 @@ body {
 /* Sidebar */
 .sidebar {
     width: 220px;
-    background-color: #7dacee;
+    background-color: #1976d2;
     color: white;
     padding: 20px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
 }
+
+.main-title {
+    font-size: 2.5rem;
+    color: #fff;
+    text-align: center;
+    background: linear-gradient(135deg, #007BFF, #00D4FF);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 40px 0;
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 1px;
+}
+
 
 .sidebar h2 {
     font-size: 20px;
@@ -82,18 +98,18 @@ body {
     gap: 20px;
 }
 
-.nit-card {
+.articulo-card {
     background-color: white;
     padding: 15px;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
-.nit-card p {
+.articulo-card p {
     margin: 6px 0;
 }
 
-.nit-card button {
+.articulo-card button {
     background-color: #ef4444;
     color: white;
     border: none;
@@ -102,7 +118,7 @@ body {
     cursor: pointer;
 }
 
-.nit-card button:hover {
+.articulo-card button:hover {
     background-color: #dc2626;
 }
 

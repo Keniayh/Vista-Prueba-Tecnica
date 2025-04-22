@@ -7,15 +7,32 @@ body {
     color: #1e293b;
 }
 
+
 /* Sidebar */
 .sidebar {
     width: 220px;
-    background-color: #7dacee;
+    background-color: #1976d2;
     color: white;
     padding: 20px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
 }
+
+.main-title {
+    font-size: 2.5rem;
+    color: #fff;
+    text-align: center;
+    background: linear-gradient(135deg, #007BFF, #00D4FF);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 40px 0;
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 1px;
+}
+
 
 .sidebar h2 {
     font-size: 20px;

@@ -9,24 +9,28 @@
 <body>
 
   <div class="sidebar">
-    <h2>Mi Dashboard</h2>
-    <a href="../index.html">Inicio</a>
-    <a href="./nit.html">Clientes</a>
-    <a href="./articulos.html">Articulos</a>
+    <h2>💊 Farmacia Sistema</h2>
+    <a href="../index.html">📝 Facturas</a>
+    <a href="./nit.html">👥 Clientes</a>
+    <a href="./articulos.html">📦 Articulos</a>
     <a href="#">Configuración</a>
   </div>
 
   <div class="main">
-    <h1>Gestión de Clientes</h1>
+    <h1 class="main-title">Gestión de Clientes</h1>
 
     <div class="form-section">
       <h2>Nuevo Cliente</h2>
+      <label for="nombre">Nombre:</label>
       <input type="text" id="nombre" placeholder="Nombre" >
+      <label for="doc">Documento:</label>
       <input type="text" id="doc" placeholder="Documento" >
+      <label for="cupo">Cupo:</label>
       <input type="number" id="cupo" placeholder="Cupo" required>
+      <label for="plazo">Plazo:</label>
       <input type="number" id="plazo" placeholder="Plazo" required>
-      <input type="number" id="cartera" placeholder="Cartera" required>
-      <input type="number" id="disponible" placeholder="Disponible" required>
+      <label for="cartera">Cartera:</label>
+      <input type="number" id="cartera" placeholder="Cartera"  value="0" readonly required>
       <button onclick="submitNitForm()">Guardar</button>
       <div id="message"></div>
     </div>

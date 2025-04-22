@@ -3,37 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gestión de Nits</title>
+  <title>Gestión de Artículos</title>
   <link rel="stylesheet" href="../css/articulos.css">
 </head>
 <body>
 
   <div class="sidebar">
-    <h2>Mi Dashboard</h2>
-    <a href="../index.html">Inicio</a>
-    <a href="./nit.html">Clientes</a>
-    <a href="./articulos.html">Articulos</a>
-    <a href="#">Configuración</a>
+    <h2>💊 Farmacia Sistema</h2>
+    <a href="../index.html">📝 Facturas</a>
+    <a href="./nit.html">👥 Clientes</a>
+    <a href="./articulos.html">📦 Artículos</a>
+    <a href="#">⚙️ Configuración</a>
   </div>
 
   <div class="main">
-    <h1>Gestión de Articulos</h1>
+    <h1 class="main-title">Gestión de Artículos</h1>
 
     <div class="form-section">
-      <h2>Nuevo Cliente</h2>
-      <input type="text" id="nombre" placeholder="Nombre" >
-      <input type="text" id="doc" placeholder="Documento" >
-      <input type="number" id="cupo" placeholder="Cupo" required>
-      <input type="number" id="plazo" placeholder="Plazo" required>
-      <input type="number" id="cartera" placeholder="Cartera" required>
-      <input type="number" id="disponible" placeholder="Disponible" required>
-      <button onclick="submitNitForm()">Guardar</button>
+      <h2>Nuevo Artículo</h2>
+      <label for="codigo">Código del Artículo:</label>
+      <input type="number" id="codigo" placeholder="Código" required>
+      
+      <label for="nombre">Nombre del Artículo:</label>
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      
+      <label for="laboratorio">Laboratorio:</label>
+      <input type="text" id="laboratorio" placeholder="Laboratorio" required>
+      
+      <label for="saldo">Saldo:</label>
+      <input type="number" id="saldo" placeholder="Saldo" required>
+      
+      <label for="costo">Costo:</label>
+      <input type="number" id="costo" placeholder="Costo" step="0.01" required>
+      
+      <label for="precioVenta">Precio de Venta:</label>
+      <input type="number" id="precioVenta" placeholder="Precio de Venta" step="0.01" required>
+      
+      <button onclick="submitArticuloForm()">Guardar</button>
       <div id="message"></div>
     </div>
 
-    <div class="articulos" id="articulos"></div>
+    <div class="articulos-list" id="articulos"></div>
   </div>
 
-  <script src="../js/nit.js"></script>
+  <script src="../js/articulos.js"></script>
 </body>
 </html>
