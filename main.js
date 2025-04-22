@@ -93,15 +93,6 @@ function actualizarEstadisticas() {
   document.getElementById('promedioVenta').textContent = `$${promedioVenta.toFixed(2)}`;
 }
 
-
-// // Función para actualizar las estadísticas en el DOM
-// function actualizarEstadisticas() {
-//   const stats = calcularEstadisticas();
-//   document.getElementById('totalFacturas').textContent = stats.totalFacturas;
-//   document.getElementById('totalVentas').textContent = `$${stats.totalVentas}`;
-//   document.getElementById('promedioVenta').textContent = `$${stats.promedioVenta}`;
-// }
-
 // Función para mostrar información del cliente
 function mostrarInfoCliente(clienteId) {
   const cliente = clientes.find(c => c.id === clienteId);
@@ -216,7 +207,7 @@ document.querySelector('#app').innerHTML = `
         <li class="nav-item" data-view="facturas">📝 Facturas</li>
         <li class="nav-item" data-view="clientes"><a href="./view/nit.html">👥 Clientes</a></li>
         <li class="nav-item" data-view="productos"><a href="./view/articulos.html">📦 Articulos</a></li>
-        <li class="nav-item" data-view="reportes">📊 Reportes</li>
+        <li class="nav-item" data-view="reportes"><a href="./view/facturasView.html">📊 Historial Facturas</a></li>
       </ul>
     </div>
     
@@ -243,7 +234,10 @@ document.querySelector('#app').innerHTML = `
             <div class="stat-label">Promedio por Venta</div>
           </div>
         </div>
-
+        <div class="form-group">
+        <label for="facCod">Cod Factura:</label>
+        <input type="number" id="facCod" value="1" min="1">
+      </div>
         <div class="form-group">
           <label for="clienteSelect">Cliente:</label>
           <select id="clienteSelect">
@@ -270,8 +264,8 @@ document.querySelector('#app').innerHTML = `
         <label for="naturaleza">Naturaleza:</label>
         <select id="naturaleza">
           <option value="">Seleccione la naturaleza</option>
-          <option value="venta">+</option>
-          <option value="devolucion">-</option>
+          <option value="+">+</option>
+          <option value="-">-</option>
         </select>
       </div>
       <div class="form-group">
@@ -309,6 +303,7 @@ document.querySelector('#app').innerHTML = `
     <thead>
       <tr>
         <th>Acciones</th>
+        <th>Cod Factura</th>
         <th>ID Cliente</th>
         <th>Cliente</th>
         <th>ID Artículo</th>
@@ -389,10 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
   naturalezaSelect.addEventListener('change', () => {
     const naturaleza = naturalezaSelect.value;
 
-    if (naturaleza === 'venta') {
+    if (naturaleza === '+') {
       costoInput.disabled = false; // Costo habilitado
       precioGroup.style.display = 'none'; // Precio oculto
-    } else if (naturaleza === 'devolucion') {
+    } else if (naturaleza === '-') {
       costoInput.disabled = true; // Costo deshabilitado
       precioGroup.style.display = 'block'; // Precio visible
     } else {
@@ -408,11 +403,11 @@ document.getElementById('naturaleza').addEventListener('change', (event) => {
   const costoInput = document.getElementById('costoUni'); // Ajusta el ID si no coincide.
   const precioInput = document.getElementById('precioUni'); // Ajusta el ID si no coincide.
 
-  if (naturaleza === 'venta') {
+  if (naturaleza === '+') {
     // Naturaleza positiva: habilitar costo, mostrar precio sin modificar
     costoInput.disabled = false;
     precioInput.disabled = true; // Solo mostrar, no modificar
-  } else if (naturaleza === 'devolucion') {
+  } else if (naturaleza === '-') {
     // Naturaleza negativa: deshabilitar costo, mostrar precio sin modificar
     costoInput.disabled = true;
     precioInput.disabled = true; // Solo mostrar, no modificar
@@ -449,6 +444,7 @@ document.getElementById('articuloSelect').addEventListener('change', (e) => {
 
 
 document.getElementById('agregarBtn').addEventListener('click', () => {
+  const codFactura = parseInt(document.getElementById('facCod').value);
   const clienteId = parseInt(document.getElementById('clienteSelect').value);
   const articuloId = parseInt(document.getElementById('articuloSelect').value);
   const naturaleza = document.getElementById('naturaleza').value;
@@ -466,10 +462,24 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
   const cliente = clientes.find(c => c.id === clienteId);
   const articulo = articulos.find(a => a.id === articuloId);
 
-  const totalVenta = naturaleza === 'venta' ? cantidad * articulo.precioVenta : cantidad * precio;
-  const totalCosto = naturaleza === 'venta' ? cantidad * costo : 0;
+  let totalVenta = 0;
+  let totalCosto = 0;
+
+  if (naturaleza === '+') {
+    totalVenta = 0;
+    totalCosto = cantidad * costo;
+  } else if (naturaleza === '-') {
+    totalVenta = cantidad * precio;
+    totalCosto = 0;
+  } else {
+    // Manejo en caso de un valor inesperado (esto puede ser un fallback)
+    totalVenta = 0;
+    totalCosto = 0;
+  }
+  
 
   const nuevaFactura = {
+    codFactura,
     clienteId,
     clienteNombre: cliente.nombre,
     articuloId,
@@ -501,7 +511,7 @@ function actualizarTablaFactura() {
   let totalVenta = 0;  // Inicializar el total de venta
   let totalCosto = 0;  // Inicializar el total de costo
 
-  facturas.forEach((item) => {
+  facturas.forEach((item, index) => {
     // Acumular los totales
     totalVenta += item.total;
     totalCosto += item.totalCosto;
@@ -509,6 +519,7 @@ function actualizarTablaFactura() {
     const row = `
       <tr>
         <td><button onclick="eliminarLineaFactura(${index})">🗑️</button></td>
+        <td>${item.codFactura}</td>
         <td>${item.clienteId}</td>
         <td>${item.clienteNombre}</td>
         <td>${item.articuloId}</td>
@@ -533,68 +544,12 @@ function actualizarTablaFactura() {
 }
 
 
-document.getElementById('guardarBtn').addEventListener('click', async () => {
-  if (facturas.length === 0) {
-    alert('No hay items para guardar en la factura');
-    return;
-  }
-
-  // Crear el objeto con los datos de la factura
-  const facturaData = {
-    fechaFactura: document.getElementById('fechaFactura').value,
-    facturas: facturas.map(factura => ({
-      cliente: factura.cliente,
-      articulo: factura.articulo,
-      cantidad: factura.cantidad,
-      precioUnitario: factura.precioUnitario,
-      totalVenta: factura.totalVenta,
-      totalCosto: factura.totalCosto
-    }))
-  };
-
-  // Llamar a la función para enviar los datos al backend
-  await guardarFacturaEnServidor(facturaData);
-
-  // Limpiar las facturas y actualizar la interfaz
-  facturas = [];
-  actualizarTablaFactura();
-  actualizarEstadisticas();
-});
-
-document.getElementById('guardarBtn').addEventListener('click', async () => {
-  if (facturas.length === 0) {
-    alert('No hay items para guardar en la factura');
-    return;
-  }
-
-  // Crear el objeto con los datos de la factura
-  const facturaData = {
-    fechaFactura: document.getElementById('fechaFactura').value,
-    facturas: facturas.map(factura => ({
-      cliente: factura.cliente,
-      articulo: factura.articulo,
-      cantidad: factura.cantidad,
-      precioUnitario: factura.precioUnitario,
-      totalVenta: factura.totalVenta,
-      totalCosto: factura.totalCosto
-    }))
-  };
-
-  // Llamar a la función para enviar los datos al backend
-  await guardarFacturaEnServidor(facturaData);
-
-  // Limpiar las facturas y actualizar la interfaz
-  facturas = [];
-  actualizarTablaFactura();
-  actualizarEstadisticas();
-});
-
-
 function renderizarTablaFactura() {
   const tbody = document.getElementById('facturaBody');
   tbody.innerHTML = facturas.map((f, index) => `
     <tr>
       <td><button onclick="eliminarLineaFactura(${index})">🗑️</button></td>
+      <td>${f.codFactura}</td>
       <td>${f.clienteId}</td>
       <td>${f.clienteNombre}</td>
       <td>${f.articuloId}</td>
@@ -613,36 +568,6 @@ function renderizarTablaFactura() {
 }
 
 
-
-
-document.getElementById('guardarBtn').addEventListener('click', async () => {
-  if (facturas.length === 0) {
-    alert('No hay items para guardar en la factura');
-    return;
-  }
-
-  // Crear el objeto con los datos de la factura
-  const facturaData = {
-    fechaFactura: document.getElementById('fechaFactura').value,
-    facturas: facturas.map(factura => ({
-      cliente: factura.cliente,
-      articulo: factura.articulo,
-      cantidad: factura.cantidad,
-      precioUnitario: factura.precioUnitario,
-      totalVenta: factura.totalVenta,
-      totalCosto: factura.totalCosto
-    }))
-  };
-
-  // Llamar a la función para enviar los datos al backend
-  await guardarFacturaEnServidor(facturaData);
-
-  // Limpiar las facturas y actualizar la interfaz
-  facturas = [];
-  actualizarTablaFactura();
-  actualizarEstadisticas();
-});
-
 function eliminarLineaFactura(index) {
   facturas.splice(index, 1);
   actualizarEstadisticas();
@@ -656,58 +581,84 @@ window.eliminarLineaFactura = eliminarLineaFactura;
 actualizarEstadisticas();
 cambiarVista('facturas');
 
-document.getElementById("guardarBtn").addEventListener("click", async () => {
-  try {
-    // Paso 1: Armar la factura
-    const factura = {
-      nit: { nitCod: selectedNitCod },  // Reemplaza con tu variable
-      facTipo: selectedTipo,            // Por ejemplo: "VENTA"
-      facFecha: new Date().toISOString(), // o usa el valor de tu input fecha
-      facTotal: calcularTotalFactura(),   // Asume que ya tienes esa función
-      facNaturaleza: selectedNaturaleza   // "V" o "D"
-    };
+document.getElementById('guardarBtn').addEventListener('click', async () => {
+  if (facturas.length === 0) {
+    alert('No hay items para guardar en la factura');
+    return;
+  }
 
-    // Paso 2: Guardar factura y obtener ID generado
-    const facturaResponse = await fetch("http://localhost:3307/facturas", {
+  const facCod = parseInt(document.getElementById('facCod').value);
+  if (isNaN(facCod)) {
+    alert('Por favor ingrese un código de factura válido');
+    return;
+  }
+
+  const clienteId = parseInt(document.getElementById('clienteSelect').value);
+  const naturaleza = document.getElementById('naturaleza').value;
+  if (naturaleza !== '+' && naturaleza !== '-') {
+    alert('La naturaleza debe ser "+" o "-"');
+    return;
+  }
+
+  const totalVenta = parseFloat(document.getElementById('totalVentaSpan').textContent.replace('$', '').trim());
+  const totalCosto = parseFloat(document.getElementById('totalCostoSpan').textContent.replace('$', '').trim());
+
+  const facturaData = {
+    facCod: facCod,
+    nit: { nitCod: clienteId },
+    facFecha: document.getElementById('fechaFactura').value,
+    facVenc: document.getElementById('fechaVencimiento').value,
+    facNatu: naturaleza,
+    facTtalVt: totalVenta.toFixed(2),
+    facTtalCost: totalCosto.toFixed(2),
+  };
+
+  try {
+    // Primero, guardar la factura principal
+    const response = await fetch("http://localhost:3307/facturas", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(factura)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(facturaData)
     });
 
-    if (!facturaResponse.ok) throw new Error("Error al guardar la factura");
+    if (!response.ok) throw new Error('Error al guardar la factura');
 
-    const facturaGuardada = await facturaResponse.json();
+    const facturaGuardada = await response.json();  // Aquí ya obtienes la factura guardada con el `facCod` generado
     const facturaId = facturaGuardada.facCod;
 
-    // Paso 3: Recorrer líneas de factura (detalles)
-    for (const item of carrito) { // Asume que tienes un array "carrito" con artículos
+    // Ahora, guardar las líneas de la factura (kardex) asociadas a la factura guardada
+    for (const item of facturas) {
       const kardex = {
-        factura: { facCod: facturaId },
-        articulo: { artCod: item.artCod },
-        facKCantidad: item.cantidad,
-        facKPrecio: item.precio,
-        facKNaturaleza: selectedNaturaleza
+        factura: { facCod: facturaId },  // Relacionando con la factura recién guardada
+        articulo: { artCod: item.articuloId },  // Relacionando el artículo
+        facKUni: item.cantidad,  // Cantidad
+        facKCtUni: item.costo.toFixed(2),  // Costo unitario
+        facKTtalVt: item.total.toFixed(2),  // Total venta por artículo
+        facKTtalCost: item.totalCosto.toFixed(2)  // Total costo por artículo
       };
 
       const kardexResponse = await fetch("http://localhost:3307/facturaKardex", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(kardex)
       });
 
       if (!kardexResponse.ok) {
-        console.error("Error al guardar línea de factura:", item);
+        console.error('Error al guardar línea de factura:', item);
       }
     }
 
-    alert("¡Factura guardada correctamente!");
+    alert('¡Factura guardada correctamente!');
+    facturas = [];  // Limpiar las facturas en el frontend
+    actualizarTablaFactura();
+    actualizarEstadisticas();
 
+    // Limpiar formulario
+    document.getElementById('facCod').value = '';
+    document.getElementById('clienteSelect').value = '';
+    document.getElementById('fechaFactura').value = '';
   } catch (error) {
-    console.error("Error al guardar factura:", error);
-    alert("Error al guardar factura");
+    console.error('Error al guardar factura:', error);
+    alert('Error al guardar la factura');
   }
 });

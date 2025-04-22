@@ -1,0 +1,131 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    height: 100vh;
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background-color: #1976d2;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.main-title {
+    font-size: 2.5rem;
+    color: #fff;
+    text-align: center;
+    background: linear-gradient(135deg, #007BFF, #00D4FF);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 40px 0;
+    font-family: 'Arial', sans-serif;
+    letter-spacing: 1px;
+}
+
+
+.sidebar h2 {
+    font-size: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.sidebar a:hover {
+    background-color: #7dacee;
+}
+
+/* Main content */
+.main {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.main h1 {
+    margin-bottom: 20px;
+}
+
+/* Factura Cards */
+.factura-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.factura-card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 10px;
+}
+
+.factura-card p {
+    margin: 5px 0;
+    font-size: 1rem;
+}
+
+.factura-card ul {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 15px;
+}
+
+.factura-card ul li {
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.factura-card button {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.factura-card button:hover {
+    background-color: #dc2626;
+}
+
+.factura-card h4 {
+    margin-top: 20px;
+    font-size: 1.3rem;
+}
+
+.factura-card ul li strong {
+    color: #1e293b;
+}
+
+/* Grid layout for multiple facturas */
+.facturas-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Additional Styling */
+button {
+    cursor: pointer;
+}
+
+button:focus {
+    outline: none;
+}
