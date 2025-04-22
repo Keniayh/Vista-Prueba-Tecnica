@@ -80,30 +80,41 @@ let isDarkMode = false;
 let currentView = 'facturas';
 
 // Función para calcular estadísticas
-function calcularEstadisticas() {
+function actualizarEstadisticas() {
   const totalFacturas = facturas.length;
   const totalVentas = facturas.reduce((sum, factura) => sum + factura.total, 0);
+  const totalCosto = facturas.reduce((sum, factura) => sum + factura.totalCosto, 0); // Asegúrate de sumar el totalCosto también
   const promedioVenta = totalFacturas > 0 ? totalVentas / totalFacturas : 0;
 
-  return {
-    totalFacturas,
-    totalVentas: totalVentas.toFixed(2),
-    promedioVenta: promedioVenta.toFixed(2)
-  };
+  // Actualizar el DOM con los totales
+  document.getElementById('totalFacturas').textContent = totalFacturas;
+  document.getElementById('totalVentas').textContent = `$${totalVentas.toFixed(2)}`;
+  document.getElementById('totalCostoSpan').textContent = `$${totalCosto.toFixed(2)}`;
+  document.getElementById('promedioVenta').textContent = `$${promedioVenta.toFixed(2)}`;
 }
 
-// Función para actualizar las estadísticas en el DOM
-function actualizarEstadisticas() {
-  const stats = calcularEstadisticas();
-  document.getElementById('totalFacturas').textContent = stats.totalFacturas;
-  document.getElementById('totalVentas').textContent = `$${stats.totalVentas}`;
-  document.getElementById('promedioVenta').textContent = `$${stats.promedioVenta}`;
-}
+
+// // Función para actualizar las estadísticas en el DOM
+// function actualizarEstadisticas() {
+//   const stats = calcularEstadisticas();
+//   document.getElementById('totalFacturas').textContent = stats.totalFacturas;
+//   document.getElementById('totalVentas').textContent = `$${stats.totalVentas}`;
+//   document.getElementById('promedioVenta').textContent = `$${stats.promedioVenta}`;
+// }
 
 // Función para mostrar información del cliente
 function mostrarInfoCliente(clienteId) {
   const cliente = clientes.find(c => c.id === clienteId);
   const infoCliente = document.getElementById('clienteInfo');
+
+  // Calcular la fecha de vencimiento sumando el plazo al día actual
+  const fechaActual = new Date();
+  fechaActual.setDate(fechaActual.getDate() + cliente.plazo);  // Se suma el plazo (en días)
+
+  const fechaVencimiento = fechaActual.toISOString().split('T')[0];
+  // Asignar la fecha calculada al campo de fecha de vencimiento en el formulario
+  document.getElementById('fechaVencimiento').value = fechaVencimiento;
+
   if (cliente) {
 
     infoCliente.innerHTML = `
@@ -316,6 +327,11 @@ document.querySelector('#app').innerHTML = `
     <tbody id="facturaBody">
     </tbody>
   </table>
+  <!-- Sección para los totales fuera de la tabla -->
+<div class="totales">
+  <strong>Total Venta: </strong><span id="totalVentaSpan">$0.00</span>
+  <strong>Total Costo: </strong><span id="totalCostoSpan">$0.00</span>
+</div>
   <button class="save-button" id="guardarBtn">
     💾 Guardar Factura
   </button>
@@ -327,22 +343,28 @@ document.querySelector('#app').innerHTML = `
 `;
 
 document.getElementById('articuloSelect').addEventListener('change', (e) => {
-  const articuloId = parseInt(e.target.value);
+  const articuloId = parseInt(e.target.value);  // Convierte el valor del select a un número
 
   if (articuloId) {
-    // Mostrar la información del artículo
-    mostrarInfoArticulo(articuloId);
-
-    // Obtener el costo del artículo seleccionado y establecerlo en el campo "Costo"
+    // Buscar el artículo correspondiente
     const articulo = articulos.find(a => a.id === articuloId);
+
     if (articulo) {
-      document.getElementById('costoUni').value = articulo.costo;
+      // Mostrar la información del artículo (esto depende de tu lógica de mostrar info, aquí solo asignamos)
+      mostrarInfoArticulo(articuloId);
+
+      // Asignar los valores del artículo en los campos de costo y precio
+      document.getElementById('costoUni').value = articulo.costo; // Establece el costo
+      document.getElementById('precioUni').value = articulo.precioVenta; // Establece el precio unitario
     }
   } else {
-    document.getElementById('articuloInfo').innerHTML = '';
-    document.getElementById('costoUni').value = ''; // Limpiar el campo "Costo" si no hay artículo seleccionado
+    // Si no hay artículo seleccionado, limpiamos los campos
+    document.getElementById('articuloInfo').innerHTML = '';  // Limpiar la información
+    document.getElementById('costoUni').value = '';  // Limpiar costo
+    document.getElementById('precioUni').value = '';  // Limpiar precio
   }
 });
+
 
 
 // Establecer la fecha actual en el campo de fecha
@@ -425,6 +447,7 @@ document.getElementById('articuloSelect').addEventListener('change', (e) => {
   }
 });
 
+
 document.getElementById('agregarBtn').addEventListener('click', () => {
   const clienteId = parseInt(document.getElementById('clienteSelect').value);
   const articuloId = parseInt(document.getElementById('articuloSelect').value);
@@ -462,38 +485,110 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
   };
 
   facturas.push(nuevaFactura);
+  
+  // Actualizar las estadísticas y la tabla
   actualizarEstadisticas();
-  renderizarTablaFactura();
+  actualizarTablaFactura(); // Asegurarte de que los totales y la tabla se actualicen
 });
 
 
-// Función para mostrar las líneas en la tabla
+
+
 function actualizarTablaFactura() {
   const tbody = document.getElementById('facturaBody');
   tbody.innerHTML = ''; // Limpiar antes de volver a llenar
 
-  facturas.forEach((item, index) => {
+  let totalVenta = 0;  // Inicializar el total de venta
+  let totalCosto = 0;  // Inicializar el total de costo
+
+  facturas.forEach((item) => {
+    // Acumular los totales
+    totalVenta += item.total;
+    totalCosto += item.totalCosto;
+
     const row = `
       <tr>
-        <td><button onclick="eliminarLinea(${index})">🗑️</button></td>
+        <td><button onclick="eliminarLineaFactura(${index})">🗑️</button></td>
         <td>${item.clienteId}</td>
         <td>${item.clienteNombre}</td>
         <td>${item.articuloId}</td>
         <td>${item.articuloNombre}</td>
         <td>${item.naturaleza}</td>
-        <td>${item.costo}</td>
-        <td>${item.precio}</td>
+        <td>$${item.costo.toFixed(2)}</td>
+        <td>$${item.precio.toFixed(2)}</td>
         <td>${item.fechaVencimiento}</td>
         <td>${item.fechaFactura}</td>
         <td>${item.cantidad}</td>
-        <td>${(item.precio).toFixed(2)}</td>
-        <td>${(item.totalVenta).toFixed(2)}</td>
-        <td>${(item.totalCosto).toFixed(2)}</td>
+        <td>$${item.precio.toFixed(2)}</td>
+        <td>$${item.total.toFixed(2)}</td>
+        <td>$${item.totalCosto.toFixed(2)}</td>
       </tr>
     `;
-    tbody.innerHTML += row;
+    tbody.insertAdjacentHTML('beforeend', row);
   });
+
+  // Actualizar los totales fuera de la tabla
+  document.getElementById('totalVentaSpan').textContent = `$${totalVenta.toFixed(2)}`;
+  document.getElementById('totalCostoSpan').textContent = `$${totalCosto.toFixed(2)}`;
 }
+
+
+document.getElementById('guardarBtn').addEventListener('click', async () => {
+  if (facturas.length === 0) {
+    alert('No hay items para guardar en la factura');
+    return;
+  }
+
+  // Crear el objeto con los datos de la factura
+  const facturaData = {
+    fechaFactura: document.getElementById('fechaFactura').value,
+    facturas: facturas.map(factura => ({
+      cliente: factura.cliente,
+      articulo: factura.articulo,
+      cantidad: factura.cantidad,
+      precioUnitario: factura.precioUnitario,
+      totalVenta: factura.totalVenta,
+      totalCosto: factura.totalCosto
+    }))
+  };
+
+  // Llamar a la función para enviar los datos al backend
+  await guardarFacturaEnServidor(facturaData);
+
+  // Limpiar las facturas y actualizar la interfaz
+  facturas = [];
+  actualizarTablaFactura();
+  actualizarEstadisticas();
+});
+
+document.getElementById('guardarBtn').addEventListener('click', async () => {
+  if (facturas.length === 0) {
+    alert('No hay items para guardar en la factura');
+    return;
+  }
+
+  // Crear el objeto con los datos de la factura
+  const facturaData = {
+    fechaFactura: document.getElementById('fechaFactura').value,
+    facturas: facturas.map(factura => ({
+      cliente: factura.cliente,
+      articulo: factura.articulo,
+      cantidad: factura.cantidad,
+      precioUnitario: factura.precioUnitario,
+      totalVenta: factura.totalVenta,
+      totalCosto: factura.totalCosto
+    }))
+  };
+
+  // Llamar a la función para enviar los datos al backend
+  await guardarFacturaEnServidor(facturaData);
+
+  // Limpiar las facturas y actualizar la interfaz
+  facturas = [];
+  actualizarTablaFactura();
+  actualizarEstadisticas();
+});
+
 
 function renderizarTablaFactura() {
   const tbody = document.getElementById('facturaBody');
@@ -517,11 +612,8 @@ function renderizarTablaFactura() {
   `).join('');
 }
 
-function eliminarLineaFactura(index) {
-  facturas.splice(index, 1);
-  actualizarEstadisticas();
-  renderizarTablaFactura();
-}
+
+
 
 document.getElementById('guardarBtn').addEventListener('click', async () => {
   if (facturas.length === 0) {
@@ -542,24 +634,80 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     }))
   };
 
-
   // Llamar a la función para enviar los datos al backend
   await guardarFacturaEnServidor(facturaData);
 
   // Limpiar las facturas y actualizar la interfaz
   facturas = [];
-  actualizarTabla();
+  actualizarTablaFactura();
   actualizarEstadisticas();
 });
 
-function eliminarFactura(idFactura) {
-  facturas = facturas.filter(item => item.id !== idFactura);
-  actualizarTabla();
+function eliminarLineaFactura(index) {
+  facturas.splice(index, 1);
+  actualizarEstadisticas();
+  renderizarTablaFactura();
 }
 
-// Hacer la función eliminarFactura disponible globalmente
-window.eliminarFactura = eliminarFactura;
+window.eliminarLineaFactura = eliminarLineaFactura;
+
 
 // Inicializar estadísticas y vista activa
 actualizarEstadisticas();
 cambiarVista('facturas');
+
+document.getElementById("guardarBtn").addEventListener("click", async () => {
+  try {
+    // Paso 1: Armar la factura
+    const factura = {
+      nit: { nitCod: selectedNitCod },  // Reemplaza con tu variable
+      facTipo: selectedTipo,            // Por ejemplo: "VENTA"
+      facFecha: new Date().toISOString(), // o usa el valor de tu input fecha
+      facTotal: calcularTotalFactura(),   // Asume que ya tienes esa función
+      facNaturaleza: selectedNaturaleza   // "V" o "D"
+    };
+
+    // Paso 2: Guardar factura y obtener ID generado
+    const facturaResponse = await fetch("http://localhost:3307/facturas", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(factura)
+    });
+
+    if (!facturaResponse.ok) throw new Error("Error al guardar la factura");
+
+    const facturaGuardada = await facturaResponse.json();
+    const facturaId = facturaGuardada.facCod;
+
+    // Paso 3: Recorrer líneas de factura (detalles)
+    for (const item of carrito) { // Asume que tienes un array "carrito" con artículos
+      const kardex = {
+        factura: { facCod: facturaId },
+        articulo: { artCod: item.artCod },
+        facKCantidad: item.cantidad,
+        facKPrecio: item.precio,
+        facKNaturaleza: selectedNaturaleza
+      };
+
+      const kardexResponse = await fetch("http://localhost:3307/facturaKardex", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(kardex)
+      });
+
+      if (!kardexResponse.ok) {
+        console.error("Error al guardar línea de factura:", item);
+      }
+    }
+
+    alert("¡Factura guardada correctamente!");
+
+  } catch (error) {
+    console.error("Error al guardar factura:", error);
+    alert("Error al guardar factura");
+  }
+});
