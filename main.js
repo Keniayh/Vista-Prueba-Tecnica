@@ -139,7 +139,8 @@ function mostrarInfoCliente(clienteId) {
         <div class="info-row">
           <div class="info-field">
             <label class="info-label">Disponible:</label>
-            <input type="number" class="info-input" value="${cliente.disponible}" disabled id="disponibleInput">
+            <input type="number" class="info-input" value="${cliente.disponible}" disabled id="disponibleInput
+            ">
           </div>
         </div>
       </div>
