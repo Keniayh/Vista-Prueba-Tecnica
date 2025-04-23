@@ -133,13 +133,13 @@ function mostrarInfoCliente(clienteId) {
         <div class="info-row">
           <div class="info-field">
             <label class="info-label">Cartera:</label>
-            <input type="number" class="info-input" value="${cliente.cartera}" disabled>
+            <input type="number" class="info-input" value="${cliente.cartera}" disabled id="carteraInput">
           </div>
         </div>
         <div class="info-row">
           <div class="info-field">
             <label class="info-label">Disponible:</label>
-            <input type="number" class="info-input" value="${cliente.disponible}" disabled>
+            <input type="number" class="info-input" value="${cliente.disponible}" disabled id="disponibleInput">
           </div>
         </div>
       </div>
@@ -492,11 +492,30 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
       alert(`La cantidad solicitada (${cantidad}) excede el saldo disponible del artículo (${articulo.saldo}).`);
       return;
     }
-  }
 
-  if (totalVenta > cliente.disponible) {
-    alert(`El total de la venta ($${totalVenta.toFixed(2)}) excede el cupo disponible del cliente ($${cliente.disponible.toFixed(2)}).`);
-    return;
+    if (totalVenta > cliente.disponible) {
+      alert(`El total de la venta ($${totalVenta.toFixed(2)}) excede el cupo disponible del cliente ($${cliente.disponible.toFixed(2)}).`);
+      return;
+    }
+
+    // Actualizar la cartera y el disponible
+    const carteraNueva = cliente.cartera + totalVenta;
+    const disponibleNuevo = cliente.disponible - totalVenta;
+
+    cliente.cartera = carteraNueva;
+    cliente.disponible = disponibleNuevo;
+
+    // Actualizar los valores de Cartera y Disponible en los inputs
+    const carteraInput = document.getElementById('carteraInput');
+    const disponibleInput = document.getElementById('disponibleInput');
+    
+    if (carteraInput) {
+      carteraInput.value = cliente.cartera.toFixed(2);
+    }
+
+    if (disponibleInput) {
+      disponibleInput.value = cliente.disponible.toFixed(2);
+    }
   }
 
   // Actualizar el saldo del artículo según naturaleza
@@ -530,9 +549,6 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
 
   facturas.push(nuevaFactura);
 
-  // Actualizar el disponible del cliente
-  cliente.disponible -= totalVenta;
-
   // Bloquear naturaleza y cliente
   document.getElementById('naturaleza').disabled = true;
   document.getElementById('clienteSelect').disabled = true;
@@ -543,6 +559,7 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
 
   alert('Artículo agregado a la factura correctamente.');
 });
+
 
 
 
@@ -628,16 +645,13 @@ actualizarEstadisticas();
 cambiarVista('facturas');
 // Evento para guardar la factura
 document.getElementById('guardarBtn').addEventListener('click', async () => {
-  // Obtener el código de factura actual
   const codigoFactura = parseInt(document.getElementById('facCod').value);
 
-  // Comprobar si hay facturas para guardar
   if (facturas.length === 0) {
     alert('No hay items para guardar en la factura');
     return;
   }
 
-  // Validar el código de factura
   if (isNaN(codigoFactura)) {
     alert('Por favor ingrese un código de factura válido');
     return;
@@ -660,26 +674,34 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
   };
 
   try {
-    // Actualizar cartera y disponible si la naturaleza es negativa
-    if (naturaleza === 'negativa') {
+    if (naturaleza === '-') {
       try {
         const clienteResponse = await fetch(`http://localhost:3307/nits/${clienteId}`);
         if (!clienteResponse.ok) throw new Error('Error al obtener los datos del cliente');
 
         const cliente = await clienteResponse.json();
+        console.log(cliente);  // Esto te permitirá ver los datos completos del cliente
 
-        if (cliente.cartera === undefined || cliente.cupo === undefined) {
+        // Ahora usamos los nombres correctos de las propiedades
+        if (cliente.nitCart === undefined || cliente.nitCupo === undefined) {
           throw new Error('El cliente no tiene los campos necesarios para actualizar');
         }
 
-        const carteraNueva = cliente.cartera + totalVenta;
-        const disponibleNuevo = cliente.cupo - carteraNueva;
+        const carteraNueva = cliente.nitCart + totalVenta;
+        const disponibleNuevo = cliente.nitCupo - carteraNueva;
 
+        const clienteActualizar = {
+          ...cliente,  // Copia todos los valores del cliente
+          nitCart: carteraNueva, // Solo actualiza la cartera
+          nitDisp: disponibleNuevo // Solo actualiza el disponible
+        };
+        
         const clienteUpdateResponse = await fetch(`http://localhost:3307/nits/${clienteId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cartera: carteraNueva, disponible: disponibleNuevo })
+          body: JSON.stringify(clienteActualizar) // Actualizamos con los nombres correctos
         });
+
 
         if (!clienteUpdateResponse.ok) {
           const errorText = await clienteUpdateResponse.text();
@@ -695,7 +717,6 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
       }
     }
 
-    // Guardar factura
     const response = await fetch("http://localhost:3307/facturas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -705,7 +726,6 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     if (!response.ok) throw new Error('Error al guardar la factura');
     const facturaGuardada = await response.json();
 
-    // Guardar líneas y actualizar saldo
     for (const item of facturas) {
       try {
         const kardex = {
@@ -728,7 +748,6 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
           continue;
         }
 
-        // Obtener artículo para actualizar el saldo
         const articuloResponse = await fetch(`http://localhost:3307/articulos/${item.articuloId}`);
         if (!articuloResponse.ok) {
           console.error(`No se pudo obtener el artículo ${item.articuloId}`);
@@ -737,23 +756,18 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
 
         const articulo = await articuloResponse.json();
 
-        // Calcular el nuevo saldo basado en la naturaleza (venta o compra)
         let nuevoSaldo;
         if (naturaleza === '-') {
-          // Venta: restar unidades
           nuevoSaldo = articulo.artSaldo - item.cantidad;
         } else {
-          // Compra: sumar unidades
           nuevoSaldo = articulo.artSaldo + item.cantidad;
         }
 
-        // Crear un objeto con los datos del artículo, pero solo cambiando el saldo
         const articuloActualizar = {
-          ...articulo, // Mantener todos los demás campos igual
-          artSaldo: nuevoSaldo // Solo actualizar el saldo
+          ...articulo,
+          artSaldo: nuevoSaldo
         };
 
-        // Actualizar saldo del artículo
         const actualizarArticuloResponse = await fetch(`http://localhost:3307/articulos/${item.articuloId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -774,7 +788,6 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
 
     alert("¡Factura guardada correctamente!");
 
-    // Limpiar datos y formulario
     facturas = [];
     actualizarTablaFactura();
     actualizarEstadisticas();
@@ -791,3 +804,4 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     alert('Error al guardar la factura');
   }
 });
+
