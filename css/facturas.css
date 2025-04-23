@@ -238,6 +238,12 @@ button:focus {
     background-color: #5a6268;
 }
 
+.container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Responsive table */
 @media (max-width: 768px) {
     .facturas-table {

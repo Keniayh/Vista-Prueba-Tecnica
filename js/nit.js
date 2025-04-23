@@ -108,34 +108,30 @@ function limpiarFormulario() {
 }
 
 async function deleteNit(clienteId) {
-    const confirmation = confirm("¿Está seguro de que desea eliminar este artículo?");
+    const confirmation = confirm("¿Está seguro de que desea eliminar este cliente?");
     if (!confirmation) {
         return; // Detener la ejecución si el usuario cancela
     }
-    try {
-        // Primero, verificar si el cliente tiene facturas asociadas
-        const response = await fetch(`http://localhost:3307/facturas?clienteId=${clienteId}`);
-        const facturas = await response.json();
-        
-        // Si existen facturas asociadas al cliente, mostrar un mensaje y evitar la eliminación
-        if (facturas.length > 0) {
-            alert("No se puede eliminar este cliente porque tiene facturas asociadas.");
-            return; // Detener la ejecución y no eliminar el cliente
-        }
 
-        // Si no hay facturas asociadas, proceder con la eliminación del cliente
+    try {
+        // Proceder con la eliminación directa del cliente
         const deleteResponse = await fetch(`http://localhost:3307/nits/${clienteId}`, {
             method: 'DELETE',
         });
 
         if (!deleteResponse.ok) {
             throw new Error('Error al eliminar el cliente');
+            
         }
 
         alert('Cliente eliminado correctamente');
+        
+        // Aquí puedes actualizar la lista de clientes en la UI (suponiendo que tienes una función para eso)
+        fetchNits(); // Asumiendo que tienes una función que recarga la lista de clientes
+
     } catch (error) {
         console.error('Error:', error);
-        alert('Ocurrió un error al intentar eliminar al cliente');
+        alert("No se puede eliminar el artículo porque está relacionado con otras tablas.");
     }
 }
 

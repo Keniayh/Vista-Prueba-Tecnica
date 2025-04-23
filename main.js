@@ -257,8 +257,8 @@ document.querySelector('#app').innerHTML = `
           <select id="articuloSelect">
             <option value="">Seleccione un articulo</option>
             ${articulos.map(articulo =>
-          `<option value="${articulo.id}">${articulo.id} - ${articulo.nombre}</option>`
-          ).join('')}
+  `<option value="${articulo.id}">${articulo.id} - ${articulo.nombre}</option>`
+).join('')}
           </select>
           <!-- Aquí se mostrará la información del artículo -->
         </div>
@@ -616,7 +616,6 @@ window.eliminarLineaFactura = eliminarLineaFactura;
 // Inicializar estadísticas y vista activa
 actualizarEstadisticas();
 cambiarVista('facturas');
-
 document.getElementById('guardarBtn').addEventListener('click', async () => {
   if (facturas.length === 0) {
     alert('No hay items para guardar en la factura');
@@ -656,7 +655,7 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     if (!response.ok) throw new Error('Error al guardar la factura');
     const facturaGuardada = await response.json();
 
-    // Guardar líneas de factura (kardex) - No debe sobrescribir artículos ni cliente
+    // Guardar líneas de factura (kardex) y actualizar saldo de los artículos
     for (const item of facturas) {
       const kardex = {
         factura: { facCod: facturaGuardada.facCod },
@@ -675,31 +674,54 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
 
       if (!kardexResponse.ok) {
         console.error('Error al guardar línea de factura:', item);
+        continue;
+      }
+
+      // Aquí colocas el nuevo manejo para actualizar el saldo del artículo
+      const articuloResponse = await fetch(`http://localhost:3307/articulos/${item.articuloId}`);
+      if (!articuloResponse.ok) {
+        console.error(`Error al obtener artículo ${item.articuloId}:`, articuloResponse.statusText);
+        continue; // Continúa con el siguiente artículo si este falla
+      }
+
+      const articulo = await articuloResponse.json();
+      const nuevoSaldo = articulo.artSaldo - item.cantidad;
+
+      const updateArticuloResponse = await fetch(`http://localhost:3307/articulos/${item.articuloId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artSaldo: nuevoSaldo })
+      });
+
+      if (!updateArticuloResponse.ok) {
+        console.error('Error al actualizar el saldo del artículo:', item.articuloId);
       }
     }
 
-    // Actualizar solo el saldo de la cartera y disponible del cliente
-    const cliente = clientes.find(c => c.id === clienteId);
-    if (!cliente) {
-      throw new Error('Cliente no encontrado');
+
+    // Actualizar cartera y disponible del cliente si la naturaleza es negativa
+    if (naturaleza === 'negativa') {
+      const clienteResponse = await fetch(`http://localhost:3307/nits/${clienteId}`);
+      if (!clienteResponse.ok) throw new Error('Error al obtener los datos del cliente');
+
+      const cliente = await clienteResponse.json();
+      const carteraNueva = cliente.cartera + totalVenta;
+      const disponibleNuevo = cliente.cupo - carteraNueva;
+
+      const clienteUpdateResponse = await fetch(`http://localhost:3307/nits/${clienteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cartera: carteraNueva, disponible: disponibleNuevo })
+      });
+
+      if (!clienteUpdateResponse.ok) {
+        throw new Error("Error al actualizar la cartera y el disponible del cliente");
+      }
+
+      alert("¡Factura guardada correctamente y cartera actualizada!");
+    } else {
+      alert("Factura guardada correctamente, pero no se actualizó la cartera.");
     }
-
-    // Actualizar solo los campos necesarios (cartera y disponible)
-    const carteraNueva = cliente.cartera + totalVenta;
-    const disponibleNuevo = cliente.cupo - carteraNueva;
-
-    // Realizar la actualización solo de los campos necesarios
-    const clienteUpdateResponse = await fetch(`http://localhost:3307/nits/${clienteId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cartera: carteraNueva, disponible: disponibleNuevo })
-    });
-
-    if (!clienteUpdateResponse.ok) {
-      throw new Error("Error al actualizar la cartera y el disponible del cliente");
-    }
-
-    alert("¡Factura guardada correctamente y cartera actualizada!");
 
     // Limpiar las facturas
     facturas = [];
@@ -714,13 +736,9 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     document.getElementById('facCod').value = '';
     document.getElementById('clienteSelect').value = '';
     document.getElementById('fechaFactura').value = '';
-    
+
   } catch (error) {
     console.error('Error al guardar factura:', error);
     alert('Error al guardar la factura');
   }
 });
-
-
-
-

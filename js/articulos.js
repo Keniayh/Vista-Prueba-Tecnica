@@ -57,6 +57,7 @@ function displayArticulos(data) {
   container.appendChild(table);
 }
 
+
 function submitArticuloForm() {
   const codigo = document.getElementById("codigo").value;
   const nombre = document.getElementById("nombre").value;
@@ -65,21 +66,25 @@ function submitArticuloForm() {
   const costo = document.getElementById("costo").value;
   const precioVenta = document.getElementById("precioVenta").value;
 
+  // Verificación de campos vacíos
   if (!codigo || !nombre || !laboratorio || !saldo || !costo || !precioVenta) {
     alert("Por favor, complete todos los campos.");
     return;
   }
 
+  // Verificación de si los valores son números válidos
   if (isNaN(codigo) || isNaN(saldo) || isNaN(costo) || isNaN(precioVenta)) {
     alert("Los campos de código, saldo, costo y precio deben ser números válidos.");
     return;
   }
 
+  // Verificación de que los valores sean mayores que cero
   if (codigo <= 0 || saldo <= 0 || costo <= 0 || precioVenta <= 0) {
     alert("Los valores de código, saldo, costo y precio deben ser mayores que cero.");
     return;
   }
 
+  // Preparar los datos a enviar
   const body = {
     artCod: parseInt(codigo),
     artNom: nombre,
@@ -89,20 +94,40 @@ function submitArticuloForm() {
     artPreVt: parseFloat(precioVenta),
   };
 
+  // Enviar la solicitud POST para crear el artículo
   fetch('http://localhost:3307/articulos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   })
     .then(res => {
-      if (!res.ok) throw new Error("Error al crear el artículo");
+      // Manejar errores de respuesta HTTP
+      if (!res.ok) {
+        return res.json().then(errorData => {
+          throw new Error(errorData.message || "Error al crear el artículo");
+        });
+      }
       return res.json();
     })
-    .then(() => {
-      fetchArticulos();
-      limpiarFormulario();
+    .then((data) => {
+      fetchArticulos(); // Actualizar la lista de artículos
+      limpiarFormulario(); // Limpiar el formulario
+      alert("¡Artículo creado correctamente!");
     })
-    .catch(err => console.error('Error al crear:', err));
+    .catch(err => {
+      console.error('Error al crear:', err);
+      alert('Error al crear el artículo: ' + err.message); // Mostrar el mensaje de error al usuario
+    });
+}
+
+
+function limpiarFormulario() {
+  document.getElementById("codigo").value = '';
+  document.getElementById("nombre").value = '';
+  document.getElementById("laboratorio").value = '';
+  document.getElementById("saldo").value = '';
+  document.getElementById("costo").value = '';
+  document.getElementById("precioVenta").value = '';
 }
 
 async function deleteArticulo(articuloId) {
@@ -110,33 +135,34 @@ async function deleteArticulo(articuloId) {
   if (!confirmation) {
     return; // Detener la ejecución si el usuario cancela
   }
+
   try {
-    // Primero, verificar si el artículo tiene registros asociados en la tabla FacturaKardex
-    const response = await fetch(`http://localhost:3307/facturaKardex?articuloId=${articuloId}`);
-    const kardexItems = await response.json();
-
-    // Si existen registros asociados, mostrar un mensaje y no permitir eliminar el artículo
-    if (kardexItems.length > 0) {
-      alert("No se puede eliminar este artículo porque está asociado a facturas.");
-      return; // Detener la ejecución y no eliminar el artículo
-    }
-
-    // Si no hay registros asociados, proceder con la eliminación del artículo
+    // Proceder directamente con la eliminación del artículo
     const deleteResponse = await fetch(`http://localhost:3307/articulos/${articuloId}`, {
       method: 'DELETE',
     });
 
     if (!deleteResponse.ok) {
-      throw new Error('Error al eliminar el artículo');
+      // Si la eliminación falla por estar relacionado con otras tablas, mostrar un error
+      const errorMessage = await deleteResponse.text();
+      if (errorMessage.includes("related")) {
+        alert("No se puede eliminar el artículo porque está relacionado con otras tablas.");
+      } else {
+        alert('No se puede eliminar el artículo porque está relacionado con otras tablas.');
+      }
+      return;
     }
 
+    // Si se elimina correctamente, actualizar la interfaz de usuario (puedes refrescar la lista de artículos)
     alert('Artículo eliminado correctamente');
+    
+    // Aquí puedes actualizar la lista de artículos en la UI
+    fetchArticulos(); // Asumiendo que tienes una función que recarga la lista de artículos
   } catch (error) {
     console.error('Error:', error);
     alert('Ocurrió un error al intentar eliminar el artículo');
   }
 }
-
 
 
 // function editArticulo(id) {
