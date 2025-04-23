@@ -616,6 +616,7 @@ window.eliminarLineaFactura = eliminarLineaFactura;
 // Inicializar estadísticas y vista activa
 actualizarEstadisticas();
 cambiarVista('facturas');
+
 document.getElementById('guardarBtn').addEventListener('click', async () => {
   if (facturas.length === 0) {
     alert('No hay items para guardar en la factura');
@@ -645,6 +646,49 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
   };
 
   try {
+    // Primero, intentar actualizar la cartera y el disponible si la naturaleza es negativa
+    if (naturaleza === 'negativa') {
+      try {
+        const clienteResponse = await fetch(`http://localhost:3307/nits/${clienteId}`);
+        if (!clienteResponse.ok) throw new Error('Error al obtener los datos del cliente');
+
+        const cliente = await clienteResponse.json();
+        console.log('Cliente actual:', cliente);
+
+        // Verificar que el cliente tenga los campos 'cartera' y 'cupo'
+        if (cliente.cartera === undefined || cliente.cupo === undefined) {
+          throw new Error('El cliente no tiene los campos necesarios para actualizar');
+        }
+
+        const carteraNueva = cliente.cartera + totalVenta;
+        const disponibleNuevo = cliente.cupo - carteraNueva;
+        console.log('Nueva cartera:', carteraNueva, 'Nuevo disponible:', disponibleNuevo);
+
+        const clienteUpdateResponse = await fetch(`http://localhost:3307/nits/${clienteId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cartera: carteraNueva, disponible: disponibleNuevo })
+        });
+
+        // Verificar que el PUT se completó correctamente
+        if (!clienteUpdateResponse.ok) {
+          const errorText = await clienteUpdateResponse.text();
+          console.error('Error al actualizar la cartera del cliente:', errorText);
+          alert('No se pudo actualizar la cartera del cliente. La factura no se guardará.');
+          return;  // Si no se puede actualizar la cartera, no continuar con el proceso
+        } else {
+          // Confirmar que la actualización fue exitosa
+          const clienteUpdated = await clienteUpdateResponse.json();
+          console.log(`Cartera del cliente ${clienteId} actualizada a ${carteraNueva}, disponible a ${disponibleNuevo}`);
+          console.log('Cliente actualizado:', clienteUpdated); // Imprimir el cliente actualizado
+        }
+      } catch (error) {
+        console.error("Error al actualizar la cartera:", error);
+        alert("No se pudo actualizar la cartera del cliente. La factura no se guardará.");
+        return;  // Si hay error, no continuar con el proceso
+      }
+    }
+
     // Guardar factura principal
     const response = await fetch("http://localhost:3307/facturas", {
       method: "POST",
@@ -655,73 +699,35 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     if (!response.ok) throw new Error('Error al guardar la factura');
     const facturaGuardada = await response.json();
 
-    // Guardar líneas de factura (kardex) y actualizar saldo de los artículos
+    // Guardar líneas de factura y actualizar saldo de artículos
     for (const item of facturas) {
-      const kardex = {
-        factura: { facCod: facturaGuardada.facCod },
-        articulo: { artCod: item.articuloId },
-        facKUni: item.cantidad,
-        facKCtUni: item.costo.toFixed(2),
-        facKTtalVt: item.total.toFixed(2),
-        facKTtalCost: item.totalCosto.toFixed(2)
-      };
+      try {
+        const kardex = {
+          factura: { facCod: facturaGuardada.facCod },
+          articulo: { artCod: item.articuloId },  // Asegúrate de que `item.articuloId` esté correcto
+          facKUni: item.cantidad,
+          facKCtUni: item.costo.toFixed(2),
+          facKTtalVt: item.total.toFixed(2),
+          facKTtalCost: item.totalCosto.toFixed(2)
+        };
 
-      const kardexResponse = await fetch("http://localhost:3307/facturaKardex", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(kardex)
-      });
+        const kardexResponse = await fetch("http://localhost:3307/facturaKardex", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(kardex)
+        });
 
-      if (!kardexResponse.ok) {
-        console.error('Error al guardar línea de factura:', item);
-        continue;
-      }
+        if (!kardexResponse.ok) {
+          console.error('Error al guardar línea de factura:', item);
+          continue; // Continuar con el siguiente item
+        }
 
-      // Aquí colocas el nuevo manejo para actualizar el saldo del artículo
-      const articuloResponse = await fetch(`http://localhost:3307/articulos/${item.articuloId}`);
-      if (!articuloResponse.ok) {
-        console.error(`Error al obtener artículo ${item.articuloId}:`, articuloResponse.statusText);
-        continue; // Continúa con el siguiente artículo si este falla
-      }
-
-      const articulo = await articuloResponse.json();
-      const nuevoSaldo = articulo.artSaldo - item.cantidad;
-
-      const updateArticuloResponse = await fetch(`http://localhost:3307/articulos/${item.articuloId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ artSaldo: nuevoSaldo })
-      });
-
-      if (!updateArticuloResponse.ok) {
-        console.error('Error al actualizar el saldo del artículo:', item.articuloId);
+      } catch (error) {
+        console.error(`Error procesando el item ${item.articuloId}:`, error);
       }
     }
 
-
-    // Actualizar cartera y disponible del cliente si la naturaleza es negativa
-    if (naturaleza === 'negativa') {
-      const clienteResponse = await fetch(`http://localhost:3307/nits/${clienteId}`);
-      if (!clienteResponse.ok) throw new Error('Error al obtener los datos del cliente');
-
-      const cliente = await clienteResponse.json();
-      const carteraNueva = cliente.cartera + totalVenta;
-      const disponibleNuevo = cliente.cupo - carteraNueva;
-
-      const clienteUpdateResponse = await fetch(`http://localhost:3307/nits/${clienteId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cartera: carteraNueva, disponible: disponibleNuevo })
-      });
-
-      if (!clienteUpdateResponse.ok) {
-        throw new Error("Error al actualizar la cartera y el disponible del cliente");
-      }
-
-      alert("¡Factura guardada correctamente y cartera actualizada!");
-    } else {
-      alert("Factura guardada correctamente, pero no se actualizó la cartera.");
-    }
+    alert("¡Factura guardada correctamente!");
 
     // Limpiar las facturas
     facturas = [];
@@ -742,3 +748,4 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     alert('Error al guardar la factura');
   }
 });
+
