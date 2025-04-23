@@ -107,20 +107,38 @@ function limpiarFormulario() {
     document.getElementById("cartera").value = '';
 }
 
-function deleteNit(id) {
-    fetch(`http://localhost:3307/nits/${id}`, {
-        method: 'DELETE'
-    })
-    .then(res => {
-        if (!res.ok) throw new Error("Error al eliminar");
-        return res.text();
-    })
-    .then(() => {
-        fetchNits();
-        alert("¡NIT eliminado correctamente!");
-    })
-    .catch(err => console.error('Error al eliminar:', err));
+async function deleteNit(clienteId) {
+    const confirmation = confirm("¿Está seguro de que desea eliminar este artículo?");
+    if (!confirmation) {
+        return; // Detener la ejecución si el usuario cancela
+    }
+    try {
+        // Primero, verificar si el cliente tiene facturas asociadas
+        const response = await fetch(`http://localhost:3307/facturas?clienteId=${clienteId}`);
+        const facturas = await response.json();
+        
+        // Si existen facturas asociadas al cliente, mostrar un mensaje y evitar la eliminación
+        if (facturas.length > 0) {
+            alert("No se puede eliminar este cliente porque tiene facturas asociadas.");
+            return; // Detener la ejecución y no eliminar el cliente
+        }
+
+        // Si no hay facturas asociadas, proceder con la eliminación del cliente
+        const deleteResponse = await fetch(`http://localhost:3307/nits/${clienteId}`, {
+            method: 'DELETE',
+        });
+
+        if (!deleteResponse.ok) {
+            throw new Error('Error al eliminar el cliente');
+        }
+
+        alert('Cliente eliminado correctamente');
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Ocurrió un error al intentar eliminar al cliente');
+    }
 }
+
 
 function editNit(id) {
     const nit = data.find(n => n.nitCod === id);

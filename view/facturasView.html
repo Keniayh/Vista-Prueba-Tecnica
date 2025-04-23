@@ -1,29 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facturas</title>
     <link rel="stylesheet" href="../css/facturas.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="sidebar">
         <h2>💊 Farmacia Sistema</h2>
         <div class="container">
-        <a href="./nit.html">👥 Clientes</a>
-        <a href="./articulos.html">📦 Articulos</a>
-        <a href="../index.html">📝 Registro</a>
-        <a href="./facturasView.html">📊 Historial Facturas</a>
+            <a href="./nit.html">👥 Clientes</a>
+            <a href="./articulos.html">📦 Articulos</a>
+            <a href="../index.html">📝 Registro</a>
+            <a href="./facturasView.html">📊 Historial Facturas</a>
         </div>
     </div>
 
     <div class="main">
         <h1 class="main-title">Gestión de Facturas</h1>
-        <div id="facturas-container">
+        <div id="facturas-container"></div>
+
+        <!-- Modal para mostrar detalles -->
+        <div class="modal fade" id="facturaModal" tabindex="-1" aria-labelledby="facturaModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="facturaModalLabel">Detalles de Factura</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body" id="facturaModalBody">
+                        <!-- Los detalles de la factura se llenarán dinámicamente -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
-    
+
 
     <script src="../js/facturas.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

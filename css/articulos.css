@@ -188,4 +188,78 @@ table {
   button:hover {
     opacity: 0.9;
   }
+
+  /* Estilo para la tabla de facturas */
+.facturas-table {
+    width: 100%;
+    border-collapse: collapse; /* Elimina espacios entre bordes */
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.facturas-table th, .facturas-table td {
+    border: 1px solid #ddd; /* Borde de las celdas */
+    padding: 10px;
+    text-align: center; /* Alineación del texto */
+    font-size: 14px;
+}
+
+.facturas-table th {
+    background-color: #f4f4f4; /* Fondo para encabezados */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.facturas-table tr:nth-child(even) {
+    background-color: #f9f9f9; /* Color de fondo alterno para filas */
+}
+
+.facturas-table tr:hover {
+    background-color: #f1f1f1; /* Fondo al pasar el mouse */
+}
+
+/* Botones de acciones */
+button {
+    font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+.delete-btn {
+    color: white;
+    background-color: red;
+    font-weight: bold;
+}
+
+.delete-btn:hover {
+    background-color: darkred;
+}
+
+.view-btn {
+    color: white;
+    background-color: blue;
+    font-weight: bold;
+}
+
+.view-btn:hover {
+    background-color: darkblue;
+}
+
+/* Contenedor principal */
+#facturas-container {
+    margin: 20px auto;
+    width: 90%;
+    max-width: 1200px;
+    overflow-x: auto; /* Permite scroll horizontal en pantallas pequeñas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra para destacar */
+    border-radius: 8px; /* Bordes redondeados */
+}
+
   

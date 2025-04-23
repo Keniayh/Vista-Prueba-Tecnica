@@ -204,9 +204,9 @@ document.querySelector('#app').innerHTML = `
         💊 Farmacia Sistema
       </div>
       <ul class="nav-items">
-        <li class="nav-item" data-view="facturas">📝 Facturas</li>
-        <li class="nav-item" data-view="clientes"><a href="./view/nit.html">👥 Clientes</a></li>
-        <li class="nav-item" data-view="productos"><a href="./view/articulos.html">📦 Articulos</a></li>
+      <li class="nav-item" data-view="clientes"><a href="./view/nit.html">👥 Clientes</a></li>
+      <li class="nav-item" data-view="productos"><a href="./view/articulos.html">📦 Articulos</a></li>
+      <li class="nav-item" data-view="facturas">📝 Registro</li>
         <li class="nav-item" data-view="reportes"><a href="./view/facturasView.html">📊 Historial Facturas</a></li>
       </ul>
     </div>
@@ -469,6 +469,16 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
   const cliente = clientes.find(c => c.id === clienteId);
   const articulo = articulos.find(a => a.id === articuloId);
 
+  if (!cliente) {
+    alert('Cliente no válido.');
+    return;
+  }
+
+  if (!articulo) {
+    alert('Artículo no válido.');
+    return;
+  }
+
   let totalVenta = 0;
   let totalCosto = 0;
 
@@ -478,12 +488,22 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
   } else if (naturaleza === '-') {
     totalVenta = cantidad * precio;
     totalCosto = 0;
-  } else {
-    // Manejo en caso de un valor inesperado (esto puede ser un fallback)
-    totalVenta = 0;
-    totalCosto = 0;
+
+    // Validar saldo del artículo
+    if (cantidad > articulo.saldo) {
+      alert(`La cantidad solicitada (${cantidad}) excede el saldo disponible del artículo (${articulo.saldo}).`);
+      return;
+    }
   }
 
+  // Validar cupo del cliente
+  if (totalVenta > cliente.disponible) {
+    alert(`El total de la venta ($${totalVenta.toFixed(2)}) excede el cupo disponible del cliente ($${cliente.disponible.toFixed(2)}).`);
+    return;
+  }
+
+  // Actualizar el saldo del artículo
+  articulo.saldo -= cantidad;
 
   const nuevaFactura = {
     codFactura,
@@ -503,9 +523,18 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
 
   facturas.push(nuevaFactura);
 
+  // Actualizar el disponible del cliente
+  cliente.disponible -= totalVenta;
+
+  // Bloquear naturaleza y cliente
+  document.getElementById('naturaleza').disabled = true;
+  document.getElementById('clienteSelect').disabled = true;
+
   // Actualizar las estadísticas y la tabla
   actualizarEstadisticas();
-  actualizarTablaFactura(); // Asegurarte de que los totales y la tabla se actualicen
+  actualizarTablaFactura();
+
+  alert('Artículo agregado a la factura correctamente.');
 });
 
 
@@ -602,16 +631,12 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
 
   const clienteId = parseInt(document.getElementById('clienteSelect').value);
   const naturaleza = document.getElementById('naturaleza').value;
-  if (naturaleza !== '+' && naturaleza !== '-') {
-    alert('La naturaleza debe ser "+" o "-"');
-    return;
-  }
 
   const totalVenta = parseFloat(document.getElementById('totalVentaSpan').textContent.replace('$', '').trim());
   const totalCosto = parseFloat(document.getElementById('totalCostoSpan').textContent.replace('$', '').trim());
 
   const facturaData = {
-    facCod: facCod,
+    facCod,
     nit: { nitCod: clienteId },
     facFecha: document.getElementById('fechaFactura').value,
     facVenc: document.getElementById('fechaVencimiento').value,
@@ -621,7 +646,7 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
   };
 
   try {
-    // Primero, guardar la factura principal
+    // Guardar factura principal
     const response = await fetch("http://localhost:3307/facturas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -629,19 +654,17 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     });
 
     if (!response.ok) throw new Error('Error al guardar la factura');
+    const facturaGuardada = await response.json();
 
-    const facturaGuardada = await response.json();  // Aquí ya obtienes la factura guardada con el `facCod` generado
-    const facturaId = facturaGuardada.facCod;
-
-    // Ahora, guardar las líneas de la factura (kardex) asociadas a la factura guardada
+    // Guardar líneas de factura (kardex) - No debe sobrescribir artículos ni cliente
     for (const item of facturas) {
       const kardex = {
-        factura: { facCod: facturaId },  // Relacionando con la factura recién guardada
-        articulo: { artCod: item.articuloId },  // Relacionando el artículo
-        facKUni: item.cantidad,  // Cantidad
-        facKCtUni: item.costo.toFixed(2),  // Costo unitario
-        facKTtalVt: item.total.toFixed(2),  // Total venta por artículo
-        facKTtalCost: item.totalCosto.toFixed(2)  // Total costo por artículo
+        factura: { facCod: facturaGuardada.facCod },
+        articulo: { artCod: item.articuloId },
+        facKUni: item.cantidad,
+        facKCtUni: item.costo.toFixed(2),
+        facKTtalVt: item.total.toFixed(2),
+        facKTtalCost: item.totalCosto.toFixed(2)
       };
 
       const kardexResponse = await fetch("http://localhost:3307/facturaKardex", {
@@ -655,17 +678,49 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
       }
     }
 
-    alert('¡Factura guardada correctamente!');
-    facturas = [];  // Limpiar las facturas en el frontend
+    // Actualizar solo el saldo de la cartera y disponible del cliente
+    const cliente = clientes.find(c => c.id === clienteId);
+    if (!cliente) {
+      throw new Error('Cliente no encontrado');
+    }
+
+    // Actualizar solo los campos necesarios (cartera y disponible)
+    const carteraNueva = cliente.cartera + totalVenta;
+    const disponibleNuevo = cliente.cupo - carteraNueva;
+
+    // Realizar la actualización solo de los campos necesarios
+    const clienteUpdateResponse = await fetch(`http://localhost:3307/nits/${clienteId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cartera: carteraNueva, disponible: disponibleNuevo })
+    });
+
+    if (!clienteUpdateResponse.ok) {
+      throw new Error("Error al actualizar la cartera y el disponible del cliente");
+    }
+
+    alert("¡Factura guardada correctamente y cartera actualizada!");
+
+    // Limpiar las facturas
+    facturas = [];
     actualizarTablaFactura();
     actualizarEstadisticas();
+
+    // Habilitar cliente y naturaleza
+    document.getElementById('naturaleza').disabled = false;
+    document.getElementById('clienteSelect').disabled = false;
 
     // Limpiar formulario
     document.getElementById('facCod').value = '';
     document.getElementById('clienteSelect').value = '';
     document.getElementById('fechaFactura').value = '';
+    
   } catch (error) {
     console.error('Error al guardar factura:', error);
     alert('Error al guardar la factura');
   }
 });
+
+
+
+
