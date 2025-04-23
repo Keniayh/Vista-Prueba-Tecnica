@@ -10,10 +10,12 @@
 
   <div class="sidebar">
     <h2>💊 Farmacia Sistema</h2>
-    <a href="../index.html">📝 Facturas</a>
-    <a href="./nit.html">👥 Clientes</a>
-    <a href="./articulos.html">📦 Artículos</a>
-    <a href="./facturasView.html">📊 Historial Facturas</a>
+    <div class="container">
+      <a href="./nit.html">👥 Clientes</a>
+      <a href="./articulos.html">📦 Articulos</a>
+      <a href="../index.html">📝 Registro</a>
+      <a href="./facturasView.html">📊 Historial Facturas</a>
+    </div>
   </div>
 
   <div class="main">
@@ -21,24 +23,26 @@
 
     <div class="form-section">
       <h2>Nuevo Artículo</h2>
-      <label for="codigo">Código del Artículo:</label>
-      <input type="number" id="codigo" placeholder="Código" required>
-      
-      <label for="nombre">Nombre del Artículo:</label>
-      <input type="text" id="nombre" placeholder="Nombre" required>
-      
-      <label for="laboratorio">Laboratorio:</label>
-      <input type="text" id="laboratorio" placeholder="Laboratorio" required>
-      
-      <label for="saldo">Saldo:</label>
-      <input type="number" id="saldo" placeholder="Saldo" required>
-      
-      <label for="costo">Costo:</label>
-      <input type="number" id="costo" placeholder="Costo" step="0.01" required>
-      
-      <label for="precioVenta">Precio de Venta:</label>
-      <input type="number" id="precioVenta" placeholder="Precio de Venta" step="0.01" required>
-      
+      <div class="container">
+
+        <label for="codigo">Código:</label>
+        <input type="number" id="codigo" placeholder="Código" required>
+        
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" placeholder="Nombre" required>
+        
+        <label for="laboratorio">Laboratorio:</label>
+        <input type="text" id="laboratorio" placeholder="Laboratorio" required>
+        
+        <label for="saldo">Saldo:</label>
+        <input type="number" id="saldo" placeholder="Saldo" required>
+        
+        <label for="costo">Costo:</label>
+        <input type="number" id="costo" placeholder="Costo" step="0.01" required>
+        
+        <label for="precioVenta">Precio de Venta:</label>
+        <input type="number" id="precioVenta" placeholder="Precio de Venta" step="0.01" required>
+      </div>
       <button onclick="submitArticuloForm()">Guardar</button>
       <div id="message"></div>
     </div>

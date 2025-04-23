@@ -5,18 +5,20 @@ body {
     height: 100vh;
     background-color: #f1f5f9;
     color: #1e293b;
+    flex-direction: column;
 }
+
 
 /* Sidebar */
 .sidebar {
-    width: 220px;
+    width: 100vw;
     background-color: #1976d2;
     color: white;
     padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .main-title {
@@ -52,6 +54,12 @@ body {
     background-color: #7dacee;
 }
 
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 /* Main content */
 .main {
     flex: 1;
@@ -69,6 +77,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     margin-bottom: 30px;
+    
 }
 
 .form-section input {

@@ -45,10 +45,13 @@ body {
 .dashboard {
   display: flex;
   min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sidebar {
-  width: 250px;
+  width: 100vw;
+  height: 25vh;
   background-color: var(--sidebar-color);
   padding: 2rem 1rem;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -56,6 +59,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 @media (max-width: 768px) {
@@ -105,6 +109,7 @@ a{
 .nav-items {
   list-style: none;
   padding: 0;
+  display: flex;
 }
 
 .nav-item {
@@ -130,7 +135,7 @@ a{
 
 .main-content {
   flex: 1;
-  width: 80vw;
+  width: 100vw;
   padding: 2rem;
   background-color: var(--background-color);
 }
@@ -144,6 +149,7 @@ a{
   border-bottom: 2px solid var(--border-color);
   flex-wrap: wrap;
   gap: 1rem;
+  width: 70vw;
 }
 
 .theme-toggle {
@@ -171,6 +177,7 @@ a{
 
 .form-group {
   margin-bottom: 1.5rem;
+  width: 70vw;
 }
 
 .info-box {
@@ -179,6 +186,7 @@ a{
   border-radius: 8px;
   margin-top: 0.5rem;
   border: 1px solid var(--border-color);
+  display: flex;
 }
 
 .info-row {
@@ -248,7 +256,8 @@ select:focus, input:focus {
   font-weight: bold;
   margin-top: 1rem;
   transition: all 0.3s ease;
-  width: 100%;
+  width: 30vw;
+  height: 8vh;
 }
 
 .add-button:hover {
@@ -260,6 +269,9 @@ select:focus, input:focus {
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .invoice-grid {
@@ -269,6 +281,7 @@ select:focus, input:focus {
   margin-top: 1rem;
   border-radius: 8px;
   overflow: hidden;
+  font-size: 1vw;
 }
 
 .invoice-grid th,
@@ -299,6 +312,15 @@ select:focus, input:focus {
   transition: all 0.3s ease;
 }
 
+.container{
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.container2 {
+}
+
 .delete-button:hover {
   background-color: #D32F2F;
 }
@@ -313,7 +335,7 @@ select:focus, input:focus {
   font-size: 1rem;
   font-weight: bold;
   margin-top: 1.5rem;
-  width: 100%;
+  width: 30vw;
   transition: all 0.3s ease;
 }
 

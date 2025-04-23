@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión de Nits</title>
   <link rel="stylesheet" href="../css/nit.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
 
   <div class="sidebar">
     <h2>💊 Farmacia Sistema</h2>
-    <a href="../index.html">📝 Facturas</a>
-    <a href="./nit.html">👥 Clientes</a>
-    <a href="./articulos.html">📦 Articulos</a>
-    <a href="./facturasView.html">📊 Historial Facturas</a>
+    <div class="container">
+      <a href="./nit.html">👥 Clientes</a>
+      <a href="./articulos.html">📦 Articulos</a>
+      <a href="../index.html">📝 Registro</a>
+      <a href="./facturasView.html">📊 Historial Facturas</a>
+    </div>
+
   </div>
 
   <div class="main">
@@ -21,23 +27,76 @@
 
     <div class="form-section">
       <h2>Nuevo Cliente</h2>
-      <label for="nombre">Nombre:</label>
-      <input type="text" id="nombre" placeholder="Nombre" >
-      <label for="doc">Documento:</label>
-      <input type="text" id="doc" placeholder="Documento" >
-      <label for="cupo">Cupo:</label>
-      <input type="number" id="cupo" placeholder="Cupo" required>
-      <label for="plazo">Plazo:</label>
-      <input type="number" id="plazo" placeholder="Plazo" required>
-      <label for="cartera">Cartera:</label>
-      <input type="number" id="cartera" placeholder="Cartera"  value="0" readonly required>
+      <div class="container">
+        <label for="doc">Documento:</label>
+        <input type="text" id="doc" placeholder="Documento">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" placeholder="Nombre">
+        <label for="cupo">Cupo:</label>
+        <input type="number" id="cupo" placeholder="Cupo" required>
+        <label for="plazo">Plazo:</label>
+        <input type="number" id="plazo" placeholder="Plazo" required>
+        <label for="cartera">Cartera:</label>
+        <input type="number" id="cartera" placeholder="Cartera" value="0" readonly required>
+      </div>
       <button onclick="submitNitForm()">Guardar</button>
       <div id="message"></div>
     </div>
 
     <div class="nits-list" id="nits"></div>
+    <!-- Modal -->
+    <div class="modal fade" id="nitModal" tabindex="-1" aria-labelledby="nitModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="nitModalLabel">Editar NIT</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <form id="nitForm">
+              <input type="hidden" id="editNitCod">
+              <div class="mb-3">
+                <label for="editNombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="editNombre" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="editDoc" class="form-label">Documento</label>
+                <input type="number" class="form-control" id="editDoc" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="editCupo" class="form-label">Cupo</label>
+                <input type="number" class="form-control" id="editCupo">
+              </div>
+              <div class="mb-3">
+                <label for="editPlazo" class="form-label">Plazo</label>
+                <input type="number" class="form-control" id="editPlazo">
+              </div>
+              <div class="mb-3">
+                <label for="editCart" class="form-label">Cartera</label>
+                <input type="number" class="form-control" id="editCart" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="editDisp" class="form-label">Disponible</label>
+                <input type="number" class="form-control" id="editDisp" readonly>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="submitEdit()">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+
   </div>
 
   <script src="../js/nit.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
+
 </html>

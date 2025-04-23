@@ -5,19 +5,20 @@ body {
     height: 100vh;
     background-color: #f1f5f9;
     color: #1e293b;
+    flex-direction: column;
 }
 
 
 /* Sidebar */
 .sidebar {
-    width: 220px;
+    width: 100vw;
     background-color: #1976d2;
     color: white;
     padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .main-title {
@@ -70,6 +71,12 @@ body {
     border-radius: 12px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     margin-bottom: 30px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .form-section input {
@@ -126,3 +133,58 @@ body {
 #message {
     margin-top: 10px;
 }
+
+/* Estilos para la tabla */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  thead {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  th, td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tbody tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Botones */
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+  /* Botón Editar */
+  button:nth-child(1) {
+    background-color: #ffc107;
+    color: #212529;
+  }
+  
+  /* Botón Eliminar */
+  button:nth-child(2) {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  /* Hover en botones */
+  button:hover {
+    opacity: 0.9;
+  }
+  
