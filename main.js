@@ -616,14 +616,24 @@ window.eliminarLineaFactura = eliminarLineaFactura;
 // Inicializar estadísticas y vista activa
 actualizarEstadisticas();
 cambiarVista('facturas');
+// Recuperar el valor de facCod del localStorage (si existe) al cargar la página
+let facCod = 1; // Si no existe, empieza en 1
 
+// Mostrar el código de factura con ceros a la izquierda al cargar la página
+document.getElementById('facCod').value = facCod;
+
+// Evento para guardar la factura
 document.getElementById('guardarBtn').addEventListener('click', async () => {
+  // Obtener el código de factura actual
+  const codigoFactura = facCod;
+  
+  // Comprobar si hay facturas para guardar
   if (facturas.length === 0) {
     alert('No hay items para guardar en la factura');
     return;
   }
 
-  const facCod = parseInt(document.getElementById('facCod').value);
+  // Validar el código de factura
   if (isNaN(facCod)) {
     alert('Por favor ingrese un código de factura válido');
     return;
@@ -636,7 +646,7 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
   const totalCosto = parseFloat(document.getElementById('totalCostoSpan').textContent.replace('$', '').trim());
 
   const facturaData = {
-    facCod,
+    facCod: codigoFactura,
     nit: { nitCod: clienteId },
     facFecha: document.getElementById('fechaFactura').value,
     facVenc: document.getElementById('fechaVencimiento').value,
@@ -743,9 +753,13 @@ document.getElementById('guardarBtn').addEventListener('click', async () => {
     document.getElementById('clienteSelect').value = '';
     document.getElementById('fechaFactura').value = '';
 
+    // Incrementar el código de factura y guardar el nuevo valor
+    facCod++;
+    localStorage.setItem('facCod', facCod);
+    document.getElementById('facCod').value = facCod;
+
   } catch (error) {
     console.error('Error al guardar factura:', error);
     alert('Error al guardar la factura');
   }
 });
-
