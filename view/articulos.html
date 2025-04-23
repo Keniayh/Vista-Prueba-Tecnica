@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestión de Artículos</title>
   <link rel="stylesheet" href="../css/articulos.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
 
   <div class="sidebar">
@@ -24,22 +27,21 @@
     <div class="form-section">
       <h2>Nuevo Artículo</h2>
       <div class="container">
-
         <label for="codigo">Código:</label>
         <input type="number" id="codigo" placeholder="Código" required>
-        
+
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" placeholder="Nombre" required>
-        
+
         <label for="laboratorio">Laboratorio:</label>
         <input type="text" id="laboratorio" placeholder="Laboratorio" required>
-        
+
         <label for="saldo">Saldo:</label>
         <input type="number" id="saldo" placeholder="Saldo" required>
-        
+
         <label for="costo">Costo:</label>
         <input type="number" id="costo" placeholder="Costo" step="0.01" required>
-        
+
         <label for="precioVenta">Precio de Venta:</label>
         <input type="number" id="precioVenta" placeholder="Precio de Venta" step="0.01" required>
       </div>
@@ -48,8 +50,51 @@
     </div>
 
     <div class="articulos-list" id="articulos"></div>
+    <!-- Modal -->
+    <div class="modal fade" id="articuloModal" tabindex="-1" aria-labelledby="articuloModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content shadow">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="articuloModalLabel">Editar Artículo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <form id="articuloForm">
+              <input type="hidden" id="editCodigo">
+              <div class="mb-3">
+                <label for="editNombre" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="editNombre" readonly>
+              </div>
+              <div class="mb-3">
+                <label for="editLaboratorio" class="form-label">Laboratorio</label>
+                <input type="text" class="form-control" id="editLaboratorio">
+              </div>
+              <div class="mb-3">
+                <label for="editSaldo" class="form-label">Saldo</label>
+                <input type="number" class="form-control" id="editSaldo">
+              </div>
+              <div class="mb-3">
+                <label for="editCosto" class="form-label">Costo</label>
+                <input type="number" class="form-control" id="editCosto">
+              </div>
+              <div class="mb-3">
+                <label for="editPrecioVenta" class="form-label">Precio de Venta</label>
+                <input type="number" class="form-control" id="editPrecioVenta">
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="submitEditArticulo()">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script src="../js/articulos.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

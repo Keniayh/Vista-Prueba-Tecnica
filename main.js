@@ -117,17 +117,17 @@ function mostrarInfoCliente(clienteId) {
           </div>
           <div class="info-field">
             <label class="info-label">Nombre:</label>
-            <input type="text" class="info-input" value="${cliente.nombre}">
+            <input type="text" class="info-input" value="${cliente.nombre}" disabled>
           </div>
         </div>
         <div class="info-row">
           <div class="info-field">
             <label class="info-label">Plazo:</label>
-            <input type="text" class="info-input" value="${cliente.plazo}">
+            <input type="text" class="info-input" value="${cliente.plazo}" disabled>
           </div>
           <div class="info-field">
             <label class="info-label">Cupo:</label>
-            <input type="text" class="info-input" value="${cliente.cupo}">
+            <input type="text" class="info-input" value="${cliente.cupo}" disabled>
           </div>
         </div>
         <div class="info-row">
@@ -234,10 +234,13 @@ document.querySelector('#app').innerHTML = `
             <div class="stat-label">Promedio por Venta</div>
           </div>
         </div>
-        <div class="form-group">
-        <label for="facCod">Cod Factura:</label>
-        <input type="number" id="facCod" value="1" min="1">
-      </div>
+        
+        <div class="container1">
+          <div class="form-group">
+          <label for="facCod">Cod Factura:</label>
+          <input type="number" id="facCod" value="1" min="1">
+        </div>
+      
         <div class="form-group">
           <label for="clienteSelect">Cliente:</label>
           <select id="clienteSelect">
@@ -246,7 +249,7 @@ document.querySelector('#app').innerHTML = `
               <option value="${cliente.id}">${cliente.id} - ${cliente.nombre}</option>
             `).join('')}
           </select>
-          <div id="clienteInfo"></div> <!-- Aquí se mostrará la información del cliente -->
+          <!-- Aquí se mostrará la información del cliente -->
         </div>
 
         <div class="form-group">
@@ -254,10 +257,10 @@ document.querySelector('#app').innerHTML = `
           <select id="articuloSelect">
             <option value="">Seleccione un articulo</option>
             ${articulos.map(articulo =>
-  `<option value="${articulo.id}">${articulo.id} - ${articulo.nombre}</option>`
-).join('')}
+          `<option value="${articulo.id}">${articulo.id} - ${articulo.nombre}</option>`
+          ).join('')}
           </select>
-          <div id="articuloInfo"></div> <!-- Aquí se mostrará la información del artículo -->
+          <!-- Aquí se mostrará la información del artículo -->
         </div>
 
         <div class="form-group">
@@ -293,7 +296,11 @@ document.querySelector('#app').innerHTML = `
           <label for="fechaFactura">Fecha de la Factura:</label>
           <input type="date" id="fechaFactura" required>
         </div>
-
+      </div>
+        <div class="container">
+          <div id="clienteInfo"></div> 
+          <div id="articuloInfo"></div>
+        </div>
         <button class="add-button" id="agregarBtn">
           ✨ Agregar a la Factura
         </button>
@@ -476,7 +483,7 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
     totalVenta = 0;
     totalCosto = 0;
   }
-  
+
 
   const nuevaFactura = {
     codFactura,
@@ -495,7 +502,7 @@ document.getElementById('agregarBtn').addEventListener('click', () => {
   };
 
   facturas.push(nuevaFactura);
-  
+
   // Actualizar las estadísticas y la tabla
   actualizarEstadisticas();
   actualizarTablaFactura(); // Asegurarte de que los totales y la tabla se actualicen
